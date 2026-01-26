@@ -1,0 +1,2760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jhordan Diego Medina | Full Stack Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Modal del Bot */
+        .bot-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInModal 0.5s ease-out;
+        }
+
+        .bot-modal-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .bot-modal {
+            position: relative;
+            width: 90%;
+            max-width: 700px;
+            height: 80vh;
+            max-height: 600px;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+            border-radius: 25px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.3), 0 0 100px rgba(123, 44, 191, 0.2);
+            overflow: hidden;
+            animation: scaleInModal 0.5s ease-out;
+        }
+
+        @keyframes scaleInModal {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .bot-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 0, 110, 0.2);
+            border: 2px solid rgba(255, 0, 110, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #ff006e;
+            transition: all 0.3s ease;
+            z-index: 10001;
+        }
+
+        .bot-modal-close:hover {
+            background: rgba(255, 0, 110, 0.4);
+            border-color: #ff006e;
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        .bot-canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .bot-modal-text {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10001;
+        }
+
+        .bot-modal-text h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            background: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 50%, #ff006e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .bot-modal-text p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: rgba(160, 160, 176, 0.8);
+        }
+
+        .bot-modal-text .typing-text {
+            display: inline-block;
+            overflow: hidden;
+            border-right: 2px solid var(--primary);
+            white-space: nowrap;
+            animation: typing 3s steps(30) infinite, blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            0%, 100% { width: 0; }
+            50%, 80% { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #00d4ff; }
+        }
+
+        :root {
+            --primary: #00d4ff;
+            --secondary: #7b2cbf;
+            --accent: #ff006e;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(15, 15, 25, 0.8);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --gradient-1: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 50%, #ff006e 100%);
+            --gradient-2: linear-gradient(180deg, transparent 0%, rgba(0, 212, 255, 0.1) 100%);
+            --glow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        /* Fondo espacial */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: var(--opacity); transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            animation: shoot 3s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(-100px) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            30% { transform: translateX(calc(100vw + 100px)) translateY(100px); opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        .nebula {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .nebula-1 {
+            top: 10%;
+            left: -10%;
+            background: var(--primary);
+        }
+
+        .nebula-2 {
+            bottom: 20%;
+            right: -10%;
+            background: var(--secondary);
+            animation-delay: -10s;
+        }
+
+        .nebula-3 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--accent);
+            width: 400px;
+            height: 400px;
+            opacity: 0.08;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 30px) scale(1.05); }
+        }
+
+        /* Navegación */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.5rem 2rem;
+            background: rgba(10, 10, 15, 0.95);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 2px;
+            background: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        /* Secciones */
+        .section {
+            min-height: 100vh;
+            padding: 100px 2rem;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .section-title span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--gradient-1);
+            border-radius: 2px;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(0, 212, 255, 0); }
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .gradient-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* About Section */
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-image-wrapper {
+            position: relative;
+        }
+
+        .about-image {
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 3px solid transparent;
+            background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+                        var(--gradient-1) border-box;
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-image-glow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            filter: blur(30px);
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        .about-content h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .about-content p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Skills Section */
+        .skills-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-category {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .skill-category:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .skill-category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .skill-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .skill-category-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .skill-tag.advanced {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .skill-tag.expert {
+            border-color: #ff006e;
+            color: #ff006e;
+            background: rgba(255, 0, 110, 0.1);
+        }
+        /* Experience Section */
+        .experience-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gradient-1);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 3rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2rem;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .timeline-content {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-left: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .timeline-date {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-company {
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .timeline-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-badge {
+            padding: 0.3rem 0.8rem;
+            background: rgba(123, 44, 191, 0.2);
+            border: 1px solid rgba(123, 44, 191, 0.3);
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: var(--secondary);
+        }
+
+        /* Projects Section */
+        .projects-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+        }
+
+        .project-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(123, 44, 191, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+        }
+
+        .project-content {
+            padding: 1.5rem;
+        }
+
+        .project-type {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .project-link {
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .project-link.demo {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .project-link.github {
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .project-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .project-link.github:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Education Section */
+        .education-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .education-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .education-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .education-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .education-info h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .education-info p {
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .education-info .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Contact Section */
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-description {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .contact-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .contact-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .contact-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--glow);
+        }
+
+        .contact-card-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .contact-card-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .social-link svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover svg {
+            fill: white;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .hero-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .project-placeholder svg {
+            stroke: var(--primary);
+            opacity: 0.8;
+        }
+
+        .project-link svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .project-link.github svg {
+            fill: var(--text-secondary);
+        }
+
+        .project-link.github:hover svg {
+            fill: var(--primary);
+        }
+
+        .education-icon svg {
+            stroke: white;
+        }
+
+        .contact-card-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .contact-card-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.3rem;
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-5px) rotate(10deg);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer span {
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .about-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .about-image-wrapper {
+                display: flex;
+                justify-content: center;
+            }
+
+            .about-image-glow {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(10, 10, 15, 0.98);
+                flex-direction: column;
+                padding: 1rem 2rem;
+                gap: 0;
+                border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                padding: 1rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .education-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .section {
+                padding: 80px 1rem;
+            }
+
+            .about-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+
+        /* Animaciones de entrada */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal del Bot -->
+    <div id="bot-modal-overlay" class="bot-modal-overlay">
+        <div class="bot-modal">
+            <button class="bot-modal-close" id="close-bot-modal">✕</button>
+            <div class="bot-canvas-container" id="bot-canvas"></div>
+            <div class="bot-modal-text">
+                <h2>¡Bienvenido a mi Portafolio!</h2>
+                <p><span class="typing-text">Soy el asistente de Jhordan...</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bot Flotante (aparece después de cerrar modal) -->
+    <div id="bot-floating" class="bot-floating hidden">
+        <div id="bot-canvas-mini"></div>
+    </div>
+
+    <!-- Burbuja de diálogo del bot -->
+    <div id="bot-speech-bubble" class="bot-speech-bubble">
+        <button class="bot-bubble-close" id="close-bubble">✕</button>
+        <div class="bot-speech-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            <span id="bubble-title">Bienvenido</span>
+        </div>
+        <p class="bot-speech-text" id="bubble-text">¡Hola! Soy el asistente de Jhordan. Desplázate para conocer más sobre su trabajo.</p>
+        <div class="bot-section-indicator">
+            <div class="bot-section-dot active" data-section="inicio"></div>
+            <div class="bot-section-dot" data-section="sobre-mi"></div>
+            <div class="bot-section-dot" data-section="habilidades"></div>
+            <div class="bot-section-dot" data-section="experiencia"></div>
+            <div class="bot-section-dot" data-section="proyectos"></div>
+            <div class="bot-section-dot" data-section="contacto"></div>
+        </div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Componente de Iconos SVG
+        const Icons = {
+            rocket: () => (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                </svg>
+            ),
+            mail: () => (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+            ),
+            send: () => (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                    <path d="M22 2 11 13"/>
+                </svg>
+            ),
+            phone: () => (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+            ),
+            github: () => (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            ),
+            linkedin: () => (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+            ),
+            externalLink: () => (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" x2="21" y1="14" y2="3"/>
+                </svg>
+            ),
+            folder: () => (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
+                </svg>
+            ),
+            graduation: () => (
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+            ),
+            globe: () => (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" x2="22" y1="12" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+            ),
+            chart: () => (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" x2="18" y1="20" y2="10"/>
+                    <line x1="12" x2="12" y1="20" y2="4"/>
+                    <line x1="6" x2="6" y1="20" y2="14"/>
+                </svg>
+            ),
+            heart: () => (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                </svg>
+            ),
+            hospital: () => (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 6v4"/>
+                    <path d="M14 14h-4"/>
+                    <path d="M14 18h-4"/>
+                    <path d="M14 8h-4"/>
+                    <path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/>
+                    <path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18"/>
+                </svg>
+            ),
+            gamepad: () => (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="6" x2="10" y1="12" y2="12"/>
+                    <line x1="8" x2="8" y1="10" y2="14"/>
+                    <line x1="15" x2="15.01" y1="13" y2="13"/>
+                    <line x1="18" x2="18.01" y1="11" y2="11"/>
+                    <rect width="20" height="12" x="2" y="6" rx="2"/>
+                </svg>
+            ),
+            sparkles: () => (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                    <path d="M5 3v4"/>
+                    <path d="M19 17v4"/>
+                    <path d="M3 5h4"/>
+                    <path d="M17 19h4"/>
+                </svg>
+            ),
+            cube: () => (
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.29 7 12 12 20.71 7"/>
+                    <line x1="12" x2="12" y1="22" y2="12"/>
+                </svg>
+            ),
+            code: () => (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                </svg>
+            )
+        };
+
+        // Componente de fondo espacial
+        function SpaceBackground() {
+            const stars = Array.from({ length: 150 }, (_, i) => ({
+                id: i,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                size: Math.random() * 2 + 1,
+                duration: Math.random() * 3 + 2,
+                opacity: Math.random() * 0.5 + 0.3,
+                delay: Math.random() * 5
+            }));
+
+            return (
+                <div className="space-background">
+                    <div className="nebula nebula-1"></div>
+                    <div className="nebula nebula-2"></div>
+                    <div className="nebula nebula-3"></div>
+                    <div className="stars">
+                        {stars.map(star => (
+                            <div
+                                key={star.id}
+                                className="star"
+                                style={{
+                                    left: star.left,
+                                    top: star.top,
+                                    width: `${star.size}px`,
+                                    height: `${star.size}px`,
+                                    '--duration': `${star.duration}s`,
+                                    '--opacity': star.opacity,
+                                    animationDelay: `${star.delay}s`
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className="shooting-star" style={{ top: '20%', animationDelay: '0s' }}></div>
+                    <div className="shooting-star" style={{ top: '40%', animationDelay: '4s' }}></div>
+                    <div className="shooting-star" style={{ top: '70%', animationDelay: '8s' }}></div>
+                </div>
+            );
+        }
+
+        // Navbar
+        function Navbar() {
+            const [scrolled, setScrolled] = useState(false);
+            const [menuOpen, setMenuOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const links = [
+                { href: '#inicio', label: 'Inicio' },
+                { href: '#sobre-mi', label: 'Sobre Mí' },
+                { href: '#habilidades', label: 'Habilidades' },
+                { href: '#experiencia', label: 'Experiencia' },
+                { href: '#proyectos', label: 'Proyectos' },
+                { href: '#contacto', label: 'Contacto' }
+            ];
+
+            return (
+                <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+                    <div className="nav-content">
+                        <a href="#inicio" className="nav-logo">{'<JDM />'}</a>
+                        <ul className={`nav-links ${menuOpen ? 'active' : ''}`}>
+                            {links.map(link => (
+                                <li key={link.href}>
+                                    <a href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</a>
+                                </li>
+                            ))}
+                        </ul>
+                        <button className="mobile-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                    </div>
+                </nav>
+            );
+        }
+
+        // Hero Section
+        function Hero() {
+            return (
+                <section id="inicio" className="section hero">
+                    <div className="hero-content">
+                        <div className="hero-badge"><Icons.rocket /> Disponible para nuevos proyectos</div>
+                        <h1 className="hero-title">
+                            Hola, soy <span className="gradient-text">Jhordan</span>
+                        </h1>
+                        <p className="hero-subtitle">Full Stack Developer & AI Enthusiast</p>
+                        <p className="hero-description">
+                            Desarrollador apasionado por crear soluciones innovadoras con IA y Machine Learning. 
+                            Especializado en Python, Azure Cloud y desarrollo web moderno.
+                        </p>
+                        <div className="hero-buttons">
+                            <a href="#proyectos" className="btn btn-primary">
+                                <Icons.rocket /> Ver Proyectos
+                            </a>
+                            <a href="#contacto" className="btn btn-secondary">
+                                <Icons.send /> Contactar
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // About Section
+        function About() {
+            return (
+                <section id="sobre-mi" className="section">
+                    <h2 className="section-title"><span>Sobre Mí</span></h2>
+                    <div className="about-container">
+                        <div className="about-image-wrapper">
+                            <div className="about-image-glow"></div>
+                            <img 
+                                src="Jhordan.jpeg" 
+                                alt="Jhordan Diego Medina"
+                                className="about-image"
+                            />
+                        </div>
+                        <div className="about-content">
+                            <h3>Desarrollador Full Stack & Cloud</h3>
+                            <p>
+                                Soy estudiante de Ingeniería de Sistemas en la Universidad Privada del Norte (7mo ciclo), 
+                                apasionado por crear soluciones tecnológicas que combinen inteligencia artificial, 
+                                desarrollo web moderno y arquitecturas en la nube.
+                            </p>
+                            <p>
+                                Mi experiencia abarca desde el desarrollo de chatbots con IA generativa hasta 
+                                la implementación de Data Lakehouses en Azure. Me especializo en Python, 
+                                JavaScript/React, y SQL Server, con un enfoque en crear sistemas escalables y eficientes.
+                            </p>
+                            <div className="about-stats">
+                                <div className="stat-card">
+                                    <div className="stat-number">1+</div>
+                                    <div className="stat-label">Año de Experiencia</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">10+</div>
+                                    <div className="stat-label">Proyectos Completados</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-number">5+</div>
+                                    <div className="stat-label">Tecnologías Cloud</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Skills Section
+        function Skills() {
+            const skillCategories = [
+            {
+                icon: 'Iconos/lenguajesdeprogramacioniconos.png',
+                title: 'Lenguajes de Programación',
+                skills: [
+                    { name: 'Python', advanced: true, expert: true },
+                    { name: 'JavaScript/TypeScript', advanced: true },
+                    { name: 'C++ / OpenGL', advanced: true, expert: true },
+                    { name: 'C# / Unity', advanced: true },
+                    { name: 'Java', advanced: false },
+                    { name: 'HTML5 / CSS3', advanced: true },
+                    { name: 'Tailwind CSS', advanced: true },
+                    { name: 'T-SQL', advanced: true, expert: true }
+                ]
+            },
+            {
+                icon: 'Iconos/gamedevicono.png',
+                title: 'Game Dev & Gráficos 3D',
+                skills: [
+                    { name: 'OpenGL / GLUT / GLM', advanced: true, expert: true },
+                    { name: 'Unity Engine (C#)', advanced: true },
+                    { name: 'Unity WebGL Export', advanced: true },
+                    { name: 'Three.js / WebGL', advanced: true },
+                    { name: 'Blender (Modelado 3D)', advanced: true },
+                    { name: 'Animación Jerárquica', advanced: true, expert: true },
+                    { name: 'Física de Juegos', advanced: true },
+                    { name: 'Colisiones & Escombros', advanced: true },
+                    { name: 'Export GLB/OBJ', advanced: true }
+                ]
+            },
+            {
+                icon: 'Iconos/basededatosicono.png',
+                title: 'Bases de Datos & Data Engineering',
+                skills: [
+                    { name: 'SQL Server', advanced: true, expert: true },
+                    { name: 'PostgreSQL', advanced: true },
+                    { name: 'MongoDB', advanced: false },
+                    { name: 'Google BigQuery', advanced: true, expert: true },
+                    { name: 'Azure Data Factory', advanced: true, expert: true },
+                    { name: 'SSIS (ETL)', advanced: true },
+                    { name: 'Data Warehouse (Kimball)', advanced: true, expert: true },
+                    { name: 'Stored Procedures', advanced: true, expert: true },
+                    { name: 'Triggers', advanced: true },
+                    { name: 'Faker (100k+ registros)', advanced: true }
+                ]
+            },
+            {
+                icon: 'Iconos/cloudicono.png',
+                title: 'Cloud & DevOps',
+                skills: [
+                    { name: 'Microsoft Azure', advanced: true, expert: true },
+                    { name: 'Google Cloud Platform', advanced: true },
+                    { name: 'Azure SQL Server', advanced: true },
+                    { name: 'Data Lakehouse', advanced: true },
+                    { name: 'GitHub / Git', advanced: true },
+                    { name: 'GitHub Pages', advanced: true },
+                    { name: 'Nginx + SSL', advanced: false },
+                    { name: 'Docker', advanced: false }
+                ]
+            },
+            {
+                icon: 'Iconos/iaicono.png',
+                title: 'Machine Learning & AI',
+                skills: [
+                    { name: 'scikit-learn', advanced: true },
+                    { name: 'MLPClassifier (Redes Neuronales)', advanced: true, expert: true },
+                    { name: 'NLP (NLTK, TF-IDF)', advanced: true, expert: true },
+                    { name: 'OpenCV (Computer Vision)', advanced: true },
+                    { name: 'Gemini 2.0 Flash API', advanced: true, expert: true },
+                    { name: 'Chatbots con IA', advanced: true, expert: true },
+                    { name: 'Detección QR (pyzbar)', advanced: true },
+                    { name: 'Web Scraping (BeautifulSoup)', advanced: true }
+                ]
+            },
+            {
+                icon: 'Iconos/ioticono.png',
+                title: 'IoT & Hardware',
+                skills: [
+                    { name: 'Arduino', advanced: true },
+                    { name: 'ESP32-CAM', advanced: true, expert: true },
+                    { name: 'Comunicación Serial', advanced: true },
+                    { name: 'Sensores & Actuadores', advanced: true },
+                    { name: 'Control de Acceso QR', advanced: true, expert: true },
+                    { name: 'Servomotores', advanced: true },
+                    { name: 'LEDs Indicadores', advanced: true }
+                ]
+            },
+            {
+                icon: 'Iconos/frameworksicono.png',
+                title: 'Frameworks & Backend',
+                skills: [
+                    { name: 'Flask', advanced: true, expert: true },
+                    { name: 'React.js', advanced: true },
+                    { name: 'Node.js', advanced: false },
+                    { name: 'REST APIs (20+ endpoints)', advanced: true, expert: true },
+                    { name: 'Twitch API', advanced: true },
+                    { name: 'Power BI', advanced: true },
+                    { name: 'Postman', advanced: true },
+                    { name: 'pyodbc', advanced: true }
+                ]
+            },
+            {
+                icon: 'Iconos/designicono.png',
+                title: 'UI/UX & Diseño',
+                skills: [
+                    { name: 'Figma (Avanzado)', advanced: true, expert: true },
+                    { name: 'Auto Layout', advanced: true },
+                    { name: 'Responsive Design', advanced: true },
+                    { name: 'Animaciones CSS', advanced: true },
+                    { name: 'Canvas API', advanced: true },
+                    { name: 'Three.js 3D Viewers', advanced: true },
+                    { name: 'Efectos Matrix/Cyberpunk', advanced: true }
+                ]
+            },
+            {
+                icon: 'Iconos/metodologiasicono.png',
+                title: 'Metodologías',
+                skills: [
+                    { name: 'Scrum', advanced: true },
+                    { name: 'Kanban', advanced: true },
+                    { name: 'RUP', advanced: false },
+                    { name: 'Kimball (DW)', advanced: true, expert: true },
+                    { name: 'Documentación Técnica', advanced: true }
+                ]
+            }
+        ];
+
+            return (
+                <section id="habilidades" className="section">
+                    <h2 className="section-title"><span>Habilidades Técnicas</span></h2>
+                    <div className="skills-container">
+                        <div className="skills-grid">
+                            {skillCategories.map((category, idx) => (
+                                <div key={idx} className="skill-category">
+                                    <div className="skill-category-header">
+                                        <div className="skill-icon">
+                                            <img src={category.icon} alt={category.title} style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                                        </div>
+                                        <h3 className="skill-category-title">{category.title}</h3>
+                                    </div>
+                                    <div className="skill-tags">
+                                        {category.skills.map((skill, i) => (
+                                            <span 
+                                                key={i} 
+                                                className={`skill-tag ${skill.advanced ? 'advanced' : ''}`}
+                                            >
+                                                {skill.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Experience Section
+        function Experience() {
+            const experiences = [
+                {
+                    date: 'Enero 2025 - Octubre 2025',
+                    title: 'Desarrollador Junior',
+                    company: 'Alba Program Services',
+                    description: 'Desarrollo de páginas web con Azure para despliegue, Python (Flask) como backend y HTML/CSS/JavaScript para frontend. Implementación de APIs REST, trabajo con Azure SQL Server, optimización de consultas y procedimientos almacenados en T-SQL. Construcción de Data Lakehouse con Azure Data Factory y automatizaciones internas con Python.',
+                    tech: ['Python', 'Flask', 'Azure', 'SQL Server', 'Data Factory', 'Scrum']
+                },
+                {
+                    date: '2024 - Presente',
+                    title: 'Proyecto Académico Destacado',
+                    company: 'Sistema Integral de Gestión de Citas Médicas - EsSalud',
+                    description: 'Plataforma completa de agendamiento médico con frontend, backend, base de datos, Data Warehouse y despliegue en Azure. Incluye APIs REST en Flask + SQL Server, modelo relacional con +20 tablas, Data Warehouse versión 3 (Kimball), pipeline ETL automatizado y chatbot "CIRO AI" con IA generativa.',
+                    tech: ['Flask', 'SQL Server', 'Azure', 'Power BI', 'Gemini API', 'NLP', 'Docker']
+                }
+            ];
+
+            return (
+                <section id="experiencia" className="section">
+                    <h2 className="section-title"><span>Experiencia</span></h2>
+                    <div className="experience-container">
+                        <div className="timeline">
+                            {experiences.map((exp, idx) => (
+                                <div key={idx} className="timeline-item">
+                                    <div className="timeline-dot"></div>
+                                    <div className="timeline-content">
+                                        <div className="timeline-date">{exp.date}</div>
+                                        <h3 className="timeline-title">{exp.title}</h3>
+                                        <div className="timeline-company">{exp.company}</div>
+                                        <p className="timeline-description">{exp.description}</p>
+                                        <div className="timeline-tech">
+                                            {exp.tech.map((t, i) => (
+                                                <span key={i} className="tech-badge">{t}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Projects Section
+        function Projects() {
+            const projects = [
+                {
+                    type: 'Full Stack + IA',
+                    title: 'Sistema de Citas EsSalud',
+                    description: 'Plataforma integral de gestión de citas médicas con chatbot CIRO AI, Data Warehouse, dashboards en Power BI y despliegue en Azure.',
+                    tech: ['Python', 'Flask', 'SQL Server', 'Azure', 'Gemini API', 'Power BI'],
+                    demo: 'https://jhordanmc.github.io/Interacci-chc/#',
+                    github: 'https://github.com/JhordanMC',
+                    icon: 'hospital'
+                },
+                {
+                    type: 'Web App',
+                    title: 'PGOD Puntos - Sistema de Recompensas',
+                    description: 'Sistema de puntos y recompensas para comunidad de Twitch con marketplace, gambling, rankings y sistema de tickets de soporte.',
+                    tech: ['HTML', 'CSS', 'JavaScript', 'API Integration'],
+                    demo: 'https://jhordanmc.github.io/PrototiposPGOD/',
+                    github: 'https://github.com/JhordanMC',
+                    icon: 'gamepad'
+                },
+                {
+                    type: 'E-commerce',
+                    title: 'Haru Skn - Belleza Coreana',
+                    description: 'Tienda online de productos de belleza coreana con carrito de compras, autenticación de usuarios y diseño responsivo.',
+                    tech: ['React', 'CSS', 'JavaScript', 'REST API'],
+                    demo: '#',
+                    github: 'https://github.com/JhordanMC',
+                    icon: 'sparkles'
+                },
+                {
+                    type: '3D Graphics',
+                    title: 'Simulaciones OpenGL',
+                    description: 'Proyectos de gráficos 3D con animaciones, texturas, modelos OBJ y escenas interactivas usando C++ y OpenGL.',
+                    tech: ['C++', 'OpenGL', 'GLUT', '3D Modeling'],
+                    demo: '#',
+                    github: 'https://github.com/JhordanMC',
+                    icon: 'cube'
+                }
+            ];
+
+            const renderIcon = (iconName) => {
+                switch(iconName) {
+                    case 'hospital': return <Icons.hospital />;
+                    case 'gamepad': return <Icons.gamepad />;
+                    case 'sparkles': return <Icons.sparkles />;
+                    case 'cube': return <Icons.cube />;
+                    default: return <Icons.code />;
+                }
+            };
+
+            return (
+                <section id="proyectos" className="section">
+                    <h2 className="section-title"><span>Proyectos Destacados</span></h2>
+                    <div className="projects-container">
+                        <div className="projects-grid">
+                            {projects.map((project, idx) => (
+                                <div key={idx} className="project-card">
+                                    <div className="project-placeholder">{renderIcon(project.icon)}</div>
+                                    <div className="project-content">
+                                        <div className="project-type">{project.type}</div>
+                                        <h3 className="project-title">{project.title}</h3>
+                                        <p className="project-description">{project.description}</p>
+                                        <div className="project-tech">
+                                            {project.tech.map((t, i) => (
+                                                <span key={i} className="tech-badge">{t}</span>
+                                            ))}
+                                        </div>
+                                        <div className="project-links">
+                                            {project.demo !== '#' && (
+                                                <a href={project.demo} target="_blank" rel="noopener noreferrer" className="project-link demo">
+                                                    <Icons.externalLink /> Demo
+                                                </a>
+                                            )}
+                                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="project-link github">
+                                                <Icons.github /> GitHub
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Education Section
+        function Education() {
+            return (
+                <section id="educacion" className="section">
+                    <h2 className="section-title"><span>Formación Académica</span></h2>
+                    <div className="education-container">
+                        <div className="education-card">
+                            <div className="education-icon"><Icons.graduation /></div>
+                            <div className="education-info">
+                                <h3>Ingeniería de Sistemas Computacionales</h3>
+                                <p><span className="highlight">Universidad Privada del Norte</span></p>
+                                <p>7mo Ciclo - En curso</p>
+                                <p style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Icons.globe /> Inglés Avanzado</span>
+                                    <span style={{ margin: '0 0.5rem' }}>|</span>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Icons.chart /> Excel Intermedio</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Contact Section
+        function Contact() {
+            return (
+                <section id="contacto" className="section">
+                    <h2 className="section-title"><span>Contacto</span></h2>
+                    <div className="contact-container">
+                        <p className="contact-description">
+                            ¿Tienes un proyecto en mente o quieres colaborar? ¡Hablemos!
+                        </p>
+                        <div className="contact-methods">
+                            <a href="mailto:jhordanmedinac@gmail.com" className="contact-card">
+                                <span className="contact-card-icon"><Icons.mail /></span>
+                                <span className="contact-card-label">Email</span>
+                                <span className="contact-card-value">jhordanmedinac@gmail.com</span>
+                            </a>
+                            <a href="tel:+51947781743" className="contact-card">
+                                <span className="contact-card-icon"><Icons.phone /></span>
+                                <span className="contact-card-label">Teléfono</span>
+                                <span className="contact-card-value">+51 947 781 743</span>
+                            </a>
+                            <a href="https://github.com/JhordanMC" target="_blank" rel="noopener noreferrer" className="contact-card">
+                                <span className="contact-card-icon"><Icons.code /></span>
+                                <span className="contact-card-label">GitHub</span>
+                                <span className="contact-card-value">JhordanMC</span>
+                            </a>
+                        </div>
+                        <div className="social-links">
+                            <a href="https://github.com/JhordanMC" target="_blank" rel="noopener noreferrer" className="social-link" title="GitHub">
+                                <Icons.github />
+                            </a>
+                            <a href="https://linkedin.com/in/jhordan-medina-90a9442a5" target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn">
+                                <Icons.linkedin />
+                            </a>
+                            <a href="mailto:jhordanmedinac@gmail.com" className="social-link" title="Email">
+                                <Icons.mail />
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // Footer
+        function Footer() {
+            return (
+                <footer className="footer">
+                    <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                        Diseñado y desarrollado con <span style={{ color: '#00d4ff' }}><Icons.heart /></span> por <span>Jhordan Diego Medina</span> © {new Date().getFullYear()}
+                    </p>
+                </footer>
+            );
+        }
+
+        // App Principal
+        function App() {
+            return (
+                <>
+                    <SpaceBackground />
+                    <Navbar />
+                    <main>
+                        <Hero />
+                        <About />
+                        <Skills />
+                        <Experience />
+                        <Projects />
+                        <Education />
+                        <Contact />
+                    </main>
+                    <Footer />
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+    <!-- Three.js para el Bot 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Bot 3D Script
+        (function() {
+            let scene, camera, renderer, robot;
+            let leftPupil, rightPupil, leftShine, rightShine;
+            let leftEye, rightEye;
+            let mouseX = 0, mouseY = 0;
+            let targetRotationX = 0, targetRotationY = 0;
+            let animationId;
+
+            // Variables para el bot mini
+            let sceneMini, cameraMini, rendererMini, robotMini;
+            let leftPupilMini, rightPupilMini, leftShineMini, rightShineMini;
+            let leftEyeMini, rightEyeMini;
+            let animationIdMini;
+            let mouseXMini = 0, mouseYMini = 0;
+
+            function createGradientTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+                gradient.addColorStop(0, '#00d4ff');
+                gradient.addColorStop(0.5, '#7b2cbf');
+                gradient.addColorStop(1, '#ff006e');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 256, 256);
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            function createRobotModel(isMinVersion = false) {
+                const robotGroup = new THREE.Group();
+                const gradientTexture = createGradientTexture();
+
+                // Cabeza
+                const headGeometry = new THREE.SphereGeometry(3, 32, 32);
+                const headMaterial = new THREE.MeshPhongMaterial({
+                    map: gradientTexture,
+                    shininess: 30
+                });
+                const head = new THREE.Mesh(headGeometry, headMaterial);
+                head.scale.set(1, 0.75, 0.6);
+                robotGroup.add(head);
+
+                // Gafas
+                const goggleGeometry = new THREE.SphereGeometry(1, 32, 32);
+                const goggleMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x00d4ff,
+                    shininess: 60,
+                    transparent: true,
+                    opacity: 0.85
+                });
+
+                const leftGoggle = new THREE.Mesh(goggleGeometry, goggleMaterial);
+                leftGoggle.position.set(-1.3, 1.2, 1.5);
+                leftGoggle.scale.set(1.3, 0.9, 0.4);
+                robotGroup.add(leftGoggle);
+
+                const rightGoggle = new THREE.Mesh(goggleGeometry, goggleMaterial);
+                rightGoggle.position.set(1.3, 1.2, 1.5);
+                rightGoggle.scale.set(1.3, 0.9, 0.4);
+                robotGroup.add(rightGoggle);
+
+                // Bordes de las gafas
+                const goggleRimGeometry = new THREE.TorusGeometry(1.15, 0.08, 16, 32);
+                const rimMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x7b2cbf,
+                    shininess: 80
+                });
+
+                const leftRim = new THREE.Mesh(goggleRimGeometry, rimMaterial);
+                leftRim.position.set(-1.3, 1.2, 1.7);
+                leftRim.scale.set(1.13, 0.78, 1);
+                robotGroup.add(leftRim);
+
+                const rightRim = new THREE.Mesh(goggleRimGeometry, rimMaterial);
+                rightRim.position.set(1.3, 1.2, 1.7);
+                rightRim.scale.set(1.13, 0.78, 1);
+                robotGroup.add(rightRim);
+
+                // Cara
+                const faceGeometry = new THREE.SphereGeometry(2.5, 32, 32);
+                const faceMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x1a1a2e,
+                    shininess: 40
+                });
+                const face = new THREE.Mesh(faceGeometry, faceMaterial);
+                face.position.set(0, -0.8, 1.2);
+                face.scale.set(0.95, 0.36, 0.45);
+                robotGroup.add(face);
+
+                // Ojos
+                const eyeGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+                const eyeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x0a0a0f,
+                    shininess: 100
+                });
+
+                const leftEyeMesh = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                leftEyeMesh.position.set(-0.8, -0.5, 2.1);
+                robotGroup.add(leftEyeMesh);
+
+                const rightEyeMesh = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                rightEyeMesh.position.set(0.8, -0.5, 2.1);
+                robotGroup.add(rightEyeMesh);
+
+                // Pupilas
+                const pupilGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+                const pupilMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x00d4ff,
+                    emissive: 0x00d4ff,
+                    emissiveIntensity: 0.6,
+                    shininess: 100
+                });
+
+                const leftPupilMesh = new THREE.Mesh(pupilGeometry, pupilMaterial);
+                leftPupilMesh.position.set(-0.8, -0.5, 2.5);
+                robotGroup.add(leftPupilMesh);
+
+                const rightPupilMesh = new THREE.Mesh(pupilGeometry, pupilMaterial);
+                rightPupilMesh.position.set(0.8, -0.5, 2.5);
+                robotGroup.add(rightPupilMesh);
+
+                // Brillo
+                const shineGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+                const shineMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xff006e
+                });
+
+                const leftShineMesh = new THREE.Mesh(shineGeometry, shineMaterial);
+                leftShineMesh.position.set(-0.7, -0.4, 2.65);
+                robotGroup.add(leftShineMesh);
+
+                const rightShineMesh = new THREE.Mesh(shineGeometry, shineMaterial);
+                rightShineMesh.position.set(0.9, -0.4, 2.65);
+                robotGroup.add(rightShineMesh);
+
+                // Hombros
+                const shoulderGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+                const shoulderMaterial = new THREE.MeshPhongMaterial({
+                    map: gradientTexture,
+                    shininess: 60
+                });
+
+                const leftShoulder = new THREE.Mesh(shoulderGeometry, shoulderMaterial);
+                leftShoulder.position.set(-3.2, 0.5, 0);
+                robotGroup.add(leftShoulder);
+
+                const rightShoulder = new THREE.Mesh(shoulderGeometry, shoulderMaterial);
+                rightShoulder.position.set(3.2, 0.5, 0);
+                robotGroup.add(rightShoulder);
+
+                // Brazos
+                const armGeometry = new THREE.BoxGeometry(0.8, 1.8, 0.8);
+                const armMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x7b2cbf,
+                    shininess: 50
+                });
+
+                const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+                leftArm.position.set(-3.8, 0, 0);
+                robotGroup.add(leftArm);
+
+                const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+                rightArm.position.set(3.8, 0, 0);
+                robotGroup.add(rightArm);
+
+                // Antenas
+                const antennaGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                const antennaMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xff006e,
+                    emissive: 0xff006e,
+                    emissiveIntensity: 0.5
+                });
+
+                const leftAntenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+                leftAntenna.position.set(-3.8, 1.2, 0);
+                robotGroup.add(leftAntenna);
+
+                const rightAntenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+                rightAntenna.position.set(3.8, 1.2, 0);
+                robotGroup.add(rightAntenna);
+
+                return {
+                    robot: robotGroup,
+                    leftEye: leftEyeMesh,
+                    rightEye: rightEyeMesh,
+                    leftPupil: leftPupilMesh,
+                    rightPupil: rightPupilMesh,
+                    leftShine: leftShineMesh,
+                    rightShine: rightShineMesh
+                };
+            }
+
+            function initBot() {
+                const container = document.getElementById('bot-canvas');
+                if (!container) return;
+
+                scene = new THREE.Scene();
+                scene.background = null;
+
+                const containerRect = container.getBoundingClientRect();
+                camera = new THREE.PerspectiveCamera(50, containerRect.width / containerRect.height, 0.1, 1000);
+                camera.position.set(0, 0, 15);
+
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(containerRect.width, containerRect.height);
+                renderer.setClearColor(0x000000, 0);
+                container.appendChild(renderer.domElement);
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+                directionalLight.position.set(5, 10, 10);
+                scene.add(directionalLight);
+
+                const robotData = createRobotModel();
+                robot = robotData.robot;
+                leftEye = robotData.leftEye;
+                rightEye = robotData.rightEye;
+                leftPupil = robotData.leftPupil;
+                rightPupil = robotData.rightPupil;
+                leftShine = robotData.leftShine;
+                rightShine = robotData.rightShine;
+
+                scene.add(robot);
+
+                container.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('resize', onWindowResize);
+
+                animateBot();
+            }
+
+            function initBotMini() {
+                const container = document.getElementById('bot-canvas-mini');
+                if (!container) return;
+
+                sceneMini = new THREE.Scene();
+                sceneMini.background = null;
+
+                cameraMini = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+                cameraMini.position.set(0, 0, 15);
+
+                rendererMini = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                rendererMini.setSize(120, 120);
+                rendererMini.setClearColor(0x000000, 0);
+                container.appendChild(rendererMini.domElement);
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                sceneMini.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+                directionalLight.position.set(5, 10, 10);
+                sceneMini.add(directionalLight);
+
+                const robotData = createRobotModel(true);
+                robotMini = robotData.robot;
+                leftEyeMini = robotData.leftEye;
+                rightEyeMini = robotData.rightEye;
+                leftPupilMini = robotData.leftPupil;
+                rightPupilMini = robotData.rightPupil;
+                leftShineMini = robotData.leftShine;
+                rightShineMini = robotData.rightShine;
+
+                sceneMini.add(robotMini);
+
+                document.getElementById('bot-floating').addEventListener('mousemove', onMouseMoveMini);
+                
+                animateBotMini();
+            }
+
+            function onMouseMove(event) {
+                const container = document.getElementById('bot-canvas');
+                const rect = container.getBoundingClientRect();
+                mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouseY = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+
+                targetRotationY = mouseX * 0.5;
+                targetRotationX = mouseY * 0.5;
+            }
+
+            function onMouseMoveMini(event) {
+                const container = document.getElementById('bot-floating');
+                const rect = container.getBoundingClientRect();
+                mouseXMini = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouseYMini = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+            }
+
+            function onWindowResize() {
+                const container = document.getElementById('bot-canvas');
+                if (!container || !renderer) return;
+                const rect = container.getBoundingClientRect();
+                camera.aspect = rect.width / rect.height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(rect.width, rect.height);
+            }
+
+            let blinkTime = 0;
+            let nextBlink = 3000;
+            let isBlinking = false;
+
+            let blinkTimeMini = 0;
+            let nextBlinkMini = 2500;
+            let isBlinkingMini = false;
+
+            function animateBot() {
+                animationId = requestAnimationFrame(animateBot);
+
+                if (!robot) return;
+
+                robot.rotation.y += (targetRotationY - robot.rotation.y) * 0.05;
+                robot.rotation.x += (targetRotationX - robot.rotation.x) * 0.05;
+
+                const pupilMoveX = mouseX * 0.2;
+                const pupilMoveY = mouseY * 0.2;
+
+                if (leftPupil && rightPupil) {
+                    leftPupil.position.x = -0.8 + pupilMoveX;
+                    leftPupil.position.y = -0.5 + pupilMoveY;
+                    rightPupil.position.x = 0.8 + pupilMoveX;
+                    rightPupil.position.y = -0.5 + pupilMoveY;
+                }
+
+                if (leftShine && rightShine) {
+                    leftShine.position.x = -0.7 + pupilMoveX;
+                    leftShine.position.y = -0.4 + pupilMoveY;
+                    rightShine.position.x = 0.9 + pupilMoveX;
+                    rightShine.position.y = -0.4 + pupilMoveY;
+                }
+
+                blinkTime += 16;
+                if (blinkTime > nextBlink && !isBlinking) {
+                    isBlinking = true;
+                    blinkEyes();
+                    blinkTime = 0;
+                    nextBlink = 2800 + Math.random() * 1200;
+                }
+
+                renderer.render(scene, camera);
+            }
+
+            function animateBotMini() {
+                animationIdMini = requestAnimationFrame(animateBotMini);
+
+                if (!robotMini) return;
+
+                // Rotación suave siguiendo el mouse
+                robotMini.rotation.y += (mouseXMini * 0.3 - robotMini.rotation.y) * 0.08;
+                robotMini.rotation.x += (mouseYMini * 0.3 - robotMini.rotation.x) * 0.08;
+
+                // Pequeña animación de "respiración"
+                const breathe = Math.sin(Date.now() * 0.002) * 0.02;
+                robotMini.position.y = breathe;
+
+                const pupilMoveX = mouseXMini * 0.15;
+                const pupilMoveY = mouseYMini * 0.15;
+
+                if (leftPupilMini && rightPupilMini) {
+                    leftPupilMini.position.x = -0.8 + pupilMoveX;
+                    leftPupilMini.position.y = -0.5 + pupilMoveY;
+                    rightPupilMini.position.x = 0.8 + pupilMoveX;
+                    rightPupilMini.position.y = -0.5 + pupilMoveY;
+                }
+
+                if (leftShineMini && rightShineMini) {
+                    leftShineMini.position.x = -0.7 + pupilMoveX;
+                    leftShineMini.position.y = -0.4 + pupilMoveY;
+                    rightShineMini.position.x = 0.9 + pupilMoveX;
+                    rightShineMini.position.y = -0.4 + pupilMoveY;
+                }
+
+                blinkTimeMini += 16;
+                if (blinkTimeMini > nextBlinkMini && !isBlinkingMini) {
+                    isBlinkingMini = true;
+                    blinkEyesMini();
+                    blinkTimeMini = 0;
+                    nextBlinkMini = 2000 + Math.random() * 1500;
+                }
+
+                rendererMini.render(sceneMini, cameraMini);
+            }
+
+            function blinkEyes() {
+                if (leftEye) leftEye.scale.y = 0.1;
+                if (rightEye) rightEye.scale.y = 0.1;
+                if (leftPupil) leftPupil.scale.y = 0.1;
+                if (rightPupil) rightPupil.scale.y = 0.1;
+                if (leftShine) leftShine.scale.y = 0.1;
+                if (rightShine) rightShine.scale.y = 0.1;
+
+                setTimeout(() => {
+                    if (leftEye) leftEye.scale.y = 1;
+                    if (rightEye) rightEye.scale.y = 1;
+                    if (leftPupil) leftPupil.scale.y = 1;
+                    if (rightPupil) rightPupil.scale.y = 1;
+                    if (leftShine) leftShine.scale.y = 1;
+                    if (rightShine) rightShine.scale.y = 1;
+                    isBlinking = false;
+                }, 180);
+            }
+
+            function blinkEyesMini() {
+                if (leftEyeMini) leftEyeMini.scale.y = 0.1;
+                if (rightEyeMini) rightEyeMini.scale.y = 0.1;
+                if (leftPupilMini) leftPupilMini.scale.y = 0.1;
+                if (rightPupilMini) rightPupilMini.scale.y = 0.1;
+                if (leftShineMini) leftShineMini.scale.y = 0.1;
+                if (rightShineMini) rightShineMini.scale.y = 0.1;
+
+                setTimeout(() => {
+                    if (leftEyeMini) leftEyeMini.scale.y = 1;
+                    if (rightEyeMini) rightEyeMini.scale.y = 1;
+                    if (leftPupilMini) leftPupilMini.scale.y = 1;
+                    if (rightPupilMini) rightPupilMini.scale.y = 1;
+                    if (leftShineMini) leftShineMini.scale.y = 1;
+                    if (rightShineMini) rightShineMini.scale.y = 1;
+                    isBlinkingMini = false;
+                }, 150);
+            }
+
+            function destroyBot() {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                const container = document.getElementById('bot-canvas');
+                if (container && renderer && renderer.domElement) {
+                    container.removeChild(renderer.domElement);
+                }
+            }
+
+            function transitionToFloating() {
+                const modal = document.getElementById('bot-modal-overlay');
+                const floating = document.getElementById('bot-floating');
+                
+                // Ocultar el modal con fade
+                modal.style.animation = 'fadeOutModal 0.3s ease-out forwards';
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    destroyBot();
+                    
+                    // Mostrar el bot flotante con animación de caminar
+                    floating.classList.remove('hidden');
+                    floating.classList.add('bot-walking');
+                    
+                    // Inicializar el bot mini
+                    initBotMini();
+                    
+                    // Quitar la clase de animación después de que termine
+                    setTimeout(() => {
+                        floating.classList.remove('bot-walking');
+                    }, 1500);
+
+                    // Mostrar la burbuja de diálogo
+                    if (window.showBotBubble) {
+                        window.showBotBubble();
+                    }
+                }, 300);
+            }
+
+            // Inicializar el bot cuando carga la página
+            window.addEventListener('load', function() {
+                initBot();
+            });
+
+            // Cerrar modal y transicionar al bot flotante
+            document.getElementById('close-bot-modal').addEventListener('click', function() {
+                transitionToFloating();
+            });
+
+            // Cerrar con ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('bot-modal-overlay');
+                    if (!modal.classList.contains('hidden')) {
+                        transitionToFloating();
+                    }
+                }
+            });
+
+            // Click en el bot flotante para expandirlo (opcional)
+            document.getElementById('bot-floating').addEventListener('click', function() {
+                // Aquí podrías agregar funcionalidad para expandir el bot o abrir un chat
+                this.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 200);
+            });
+        })();
+
+        // Sistema de burbuja de diálogo
+        (function() {
+            const bubble = document.getElementById('bot-speech-bubble');
+            const bubbleTitle = document.getElementById('bubble-title');
+            const bubbleText = document.getElementById('bubble-text');
+            const dots = document.querySelectorAll('.bot-section-dot');
+            const closeBubble = document.getElementById('close-bubble');
+            
+            let bubbleHidden = false;
+            let currentSection = 'inicio';
+            let typingTimeout = null;
+            let isTransitioning = false;
+
+            // Mensajes para cada sección
+            const sectionMessages = {
+                'inicio': {
+                    title: '👋 ¡Bienvenido!',
+                    text: '¡Hola! Soy el asistente de <span>Jhordan</span>. Explora este portafolio para conocer su trabajo como Full Stack Developer.'
+                },
+                'sobre-mi': {
+                    title: '🧑‍💻 Sobre Jhordan',
+                    text: 'Aquí puedes conocer más sobre Jhordan: estudiante de <span>Ingeniería de Sistemas</span> en UPN, apasionado por la IA y el desarrollo web moderno.'
+                },
+                'habilidades': {
+                    title: '⚡ Habilidades Técnicas',
+                    text: 'Jhordan domina tecnologías como <span>Python, JavaScript, SQL Server, Azure</span> y herramientas de IA como <span>Gemini API</span> y <span>OpenCV</span>.'
+                },
+                'experiencia': {
+                    title: '💼 Experiencia',
+                    text: 'Conoce la trayectoria profesional de Jhordan, incluyendo su trabajo en <span>Alba Program Services</span> desarrollando soluciones cloud y Data Lakehouses.'
+                },
+                'proyectos': {
+                    title: '🚀 Proyectos Destacados',
+                    text: 'Explora proyectos como el <span>Sistema de Citas EsSalud</span> con chatbot CIRO AI, y el sistema <span>PGOD Puntos</span> para Twitch.'
+                },
+                'educacion': {
+                    title: '🎓 Formación',
+                    text: 'Jhordan cursa el <span>7mo ciclo</span> de Ingeniería de Sistemas en la Universidad Privada del Norte, con nivel avanzado de inglés.'
+                },
+                'contacto': {
+                    title: '📬 ¡Contacta!',
+                    text: '¿Tienes un proyecto en mente? ¡No dudes en contactar a Jhordan! Puedes escribirle por <span>email</span> o conectar en <span>LinkedIn</span>.'
+                }
+            };
+
+            // Función para cancelar cualquier animación de escritura en curso
+            function cancelTyping() {
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                    typingTimeout = null;
+                }
+                bubbleText.classList.remove('typing');
+            }
+
+            // Función para actualizar la burbuja (sin efecto de escritura para evitar bugs)
+            function updateBubble(sectionId) {
+                if (bubbleHidden || currentSection === sectionId || isTransitioning) return;
+                
+                isTransitioning = true;
+                currentSection = sectionId;
+                const message = sectionMessages[sectionId] || sectionMessages['inicio'];
+                
+                // Cancelar cualquier animación anterior
+                cancelTyping();
+                
+                // Animación de salida
+                bubble.style.transform = 'translateY(10px) scale(0.95)';
+                bubble.style.opacity = '0.5';
+                
+                setTimeout(() => {
+                    // Actualizar contenido directamente (más estable)
+                    bubbleTitle.textContent = message.title;
+                    bubbleText.innerHTML = message.text;
+                    
+                    // Actualizar dots
+                    dots.forEach(dot => {
+                        dot.classList.remove('active');
+                        if (dot.dataset.section === sectionId) {
+                            dot.classList.add('active');
+                        }
+                    });
+                    
+                    // Animación de entrada
+                    bubble.style.transform = 'translateY(0) scale(1)';
+                    bubble.style.opacity = '1';
+                    
+                    // Permitir nueva transición después de un pequeño delay
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 300);
+                }, 250);
+            }
+
+            // Detectar sección visible con Intersection Observer
+            function initSectionObserver() {
+                const sections = document.querySelectorAll('.section, section');
+                
+                const observer = new IntersectionObserver((entries) => {
+                    // Encontrar la sección más visible
+                    let mostVisibleSection = null;
+                    let maxRatio = 0;
+                    
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+                            maxRatio = entry.intersectionRatio;
+                            mostVisibleSection = entry.target;
+                        }
+                    });
+                    
+                    if (mostVisibleSection && maxRatio > 0.2) {
+                        const sectionId = mostVisibleSection.id || 'inicio';
+                        updateBubble(sectionId);
+                    }
+                }, {
+                    threshold: [0.2, 0.4, 0.6, 0.8],
+                    rootMargin: '-15% 0px -15% 0px'
+                });
+
+                sections.forEach(section => {
+                    if (section.id) {
+                        observer.observe(section);
+                    }
+                });
+            }
+
+            // Mostrar burbuja cuando el bot llega a la esquina
+            function showBubble() {
+                setTimeout(() => {
+                    bubble.classList.add('visible');
+                    // Iniciar el observer después de mostrar la burbuja
+                    setTimeout(initSectionObserver, 500);
+                }, 1800); // Esperar a que termine la animación del bot
+            }
+
+            // Cerrar burbuja
+            closeBubble.addEventListener('click', function(e) {
+                e.stopPropagation();
+                bubbleHidden = true;
+                bubble.classList.remove('visible');
+            });
+
+            // Reabrir burbuja al hacer click en el bot
+            document.getElementById('bot-floating').addEventListener('click', function() {
+                if (bubbleHidden) {
+                    bubbleHidden = false;
+                    bubble.classList.add('visible');
+                    // Forzar actualización con la sección actual
+                    const tempSection = currentSection;
+                    currentSection = '';
+                    updateBubble(tempSection);
+                }
+            });
+
+            // Exponer función para mostrar burbuja
+            window.showBotBubble = showBubble;
+
+            // Click en los dots para navegar
+            dots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    const sectionId = this.dataset.section;
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        })();
+    </script>
+
+    <style>
+        @keyframes fadeOutModal {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Bot flotante en esquina */
+        .bot-floating {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3), 0 0 60px rgba(123, 44, 191, 0.2);
+            z-index: 9999;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bot-floating:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5), 0 0 80px rgba(123, 44, 191, 0.3);
+        }
+
+        .bot-floating canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Burbuja de diálogo */
+        .bot-speech-bubble {
+            position: fixed;
+            bottom: 150px;
+            right: 20px;
+            max-width: 280px;
+            background: linear-gradient(135deg, rgba(15, 15, 25, 0.95), rgba(26, 26, 46, 0.95));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 15px 18px;
+            z-index: 9998;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 212, 255, 0.1);
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .bot-speech-bubble.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .bot-speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 50px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, transparent 50%, rgba(15, 15, 25, 0.95) 50%);
+            border-right: 1px solid rgba(0, 212, 255, 0.3);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            transform: rotate(45deg);
+        }
+
+        .bot-speech-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bot-speech-title svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--primary);
+        }
+
+        .bot-speech-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .bot-speech-text span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Indicador de sección actual */
+        .bot-section-indicator {
+            display: flex;
+            gap: 4px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .bot-section-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(0, 212, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .bot-section-dot.active {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            transform: scale(1.3);
+        }
+
+        /* Animación de escritura */
+        .bot-speech-text.typing::after {
+            content: '|';
+            animation: blink-cursor 0.8s infinite;
+            color: var(--primary);
+        }
+
+        @keyframes blink-cursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Botón de cerrar burbuja */
+        .bot-bubble-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bot-bubble-close:hover {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        /* Animación de caminar hacia la esquina */
+        .bot-walking {
+            animation: walkToCorner 1.5s ease-in-out forwards;
+        }
+
+        @keyframes walkToCorner {
+            0% {
+                bottom: 50%;
+                right: 50%;
+                transform: translate(50%, 50%) scale(1);
+                opacity: 1;
+            }
+            20% {
+                transform: translate(50%, 50%) scale(0.9) rotate(-5deg);
+            }
+            40% {
+                transform: translate(50%, 50%) scale(0.8) rotate(5deg);
+            }
+            60% {
+                transform: translate(50%, 50%) scale(0.6) rotate(-5deg);
+            }
+            80% {
+                transform: translate(50%, 50%) scale(0.4) rotate(5deg);
+            }
+            100% {
+                bottom: 20px;
+                right: 20px;
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .bot-floating.hidden {
+            display: none;
+        }
+    </style>
+</body>
+</html>
